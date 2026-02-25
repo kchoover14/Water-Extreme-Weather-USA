@@ -1,11 +1,11 @@
 ######################## LIBRARIES
 
 library(data.table)   # read large .bz2 file faster than base R
+library(R.utils)      # required for fread
 library(lubridate)    # parse and manipulate date variables
 library(dplyr)        # data manipulation and filtering
 library(ggplot2)      # plotting
 library(gridExtra)    # arrange multiple plots in a grid
-library(grid)         # text grob for plot titles
 library(gganimate)    # animate ggplot objects
 library(gifski)       # render gganimate output as GIF
 library(plotly)       # interactive choropleth maps
@@ -542,6 +542,7 @@ p1 = ggplot(fatalities, aes(x = reorder(evtype, fatalities),
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none") +
     ylab("Fatalities") + xlab("Weather Events") +
+    ggtitle("A") +
     coord_flip()
 
 p2 = ggplot(injuries, aes(x = reorder(evtype, injuries),
@@ -553,10 +554,10 @@ p2 = ggplot(injuries, aes(x = reorder(evtype, injuries),
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none") +
     ylab("Injuries") + xlab("") +
+    ggtitle("B") +
     coord_flip()
 
-health_plot = grid.arrange(p1, p2, nrow = 1,
-                           top = textGrob("Weather Events (1996-2011) with the Greatest Public Health Impact"))
+health_plot = grid.arrange(p1, p2, nrow = 1)
 
 ggsave("storm_health_impact.png", plot = health_plot,
        width = 10, height = 6, dpi = 300)
@@ -582,6 +583,7 @@ p3 = ggplot(property, aes(x = reorder(evtype, damage_prop),
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none") +
     ylab("Property Damage (in millions USD)") + xlab("Weather Events") +
+    ggtitle("A") +
     coord_flip()
 
 p4 = ggplot(crops, aes(x = reorder(evtype, damage_crop),
@@ -593,10 +595,10 @@ p4 = ggplot(crops, aes(x = reorder(evtype, damage_crop),
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none") +
     ylab("Crop Damage (in millions USD)") + xlab("") +
+    ggtitle("B") +
     coord_flip()
 
-damage_plot = grid.arrange(p3, p4, nrow = 1,
-                           top = textGrob("Weather Events (1996-2011) with Greatest Economic Impact"))
+damage_plot = grid.arrange(p3, p4, nrow = 1)
 
 ggsave("storm_economic_impact.png", plot = damage_plot,
        width = 10, height = 6, dpi = 300)
@@ -641,7 +643,6 @@ vsl_plot = ggplot(top10_vsl,
     theme(legend.position = "none") +
     ylab("Combined Impact (billions USD, VSL-weighted)") +
     xlab("Weather Event") +
-    ggtitle("Top 10 Weather Events by Combined Human and Economic Impact (1996-2011)") +
     coord_flip()
 
 ggsave("storm_vsl_index.png", plot = vsl_plot,
@@ -692,7 +693,7 @@ temporal_plot = ggplot(storm_annual,
     theme(legend.position  = "right",
           legend.title     = element_text(size = 9),
           legend.text      = element_text(size = 8)) +
-    labs(title  = "Annual Weather Event Impact, 1996-{as.integer(frame_along)}",
+    labs(title  = "",
          x      = "Year",
          y      = "Annual Impact (billions USD, VSL-weighted)",
          color  = "Event Type") +
@@ -775,8 +776,6 @@ prop_map = plot_ly(
     )
 ) |>
     layout(
-        title = list(text = "Property Damage per Capita by State (1996-2011)",
-                     font = list(size = 14)),
         geo   = list(
             scope        = "usa",
             showlakes    = TRUE,
@@ -813,8 +812,6 @@ crop_map = plot_ly(
     )
 ) |>
     layout(
-        title = list(text = "Crop Damage per Capita by State (1996-2011)",
-                     font = list(size = 14)),
         geo   = list(
             scope        = "usa",
             showlakes    = TRUE,
